@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="zh-CN">
+ <head>
+  <meta charset="UTF-8">
+  <title>base64url jpg view</title>
+  <meta name="description" content="此静态页面会直接显示外部通过url传来的base64url编码的图片">
+  <meta name="description-en" content="This static page shows Base64URL encoded images passed through URL.">
+ </head>
+ <body>
+ <script>
+	const b64u = getQuery('d');
+
+	if(b64u){
+		const b64 = base64url_decode(b64u);
+		const img = document.createElement('img');
+		img.src = "data:image/jpeg;base64," + b64;
+		document.body.appendChild(img);
+	}
+	
+	function getQuery(name){
+		const params = new URLSearchParams(location.search);
+		return params.get(name);
+	}
+	function base64url_decode(str){
+		let s = str.replace(/-/g,'+').replace(/_/g,'/');
+		const pad = s.length % 4;
+		if(pad > 0) s += '===='.substring(pad);
+		return s;
+	}
+ </script>
+  
+ </body>
+</html>

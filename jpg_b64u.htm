@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Jpg to Base64URL</title>
+<style>
+pre{white-space:pre-wrap;word-break:break-all;margin-top:20px;padding:10px;background:#f4f4f4;max-height:400px;overflow:auto;}
+#copyBtn{display:none;margin:8px 0;padding:4px 12px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<h1>Jpg to Base64URL</h1>
+
+<input type="file" id="fileInput" accept="image/jpeg">
+<pre id="result"></pre>
+<button id="copyBtn">Copy Base64URL</button>
+
+<script>
+
+const resultDom = document.getElementById('result');
+const copyBtn = document.getElementById('copyBtn');
+
+document.getElementById('fileInput').onchange = function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt){
+        const arr = new Uint8Array(evt.target.result);
+        // 安全的二进制字符串构造方法，不会出现非法字符
+        let binaryStr = '';
+        for(let i=0; i<arr.length; i++){
+            binaryStr += String.fromCharCode(arr[i]);
+        }
+        const b64u = base64_url(binaryStr, true);
+        //document.getElementById('result').textContent = b64u;
+		resultDom.textContent = b64u;
+        // pre有内容，显示复制按钮
+        copyBtn.style.display = 'block';
+    }
+    reader.readAsArrayBuffer(file);
+}
+
+function base64_url(code, encode = true) {
+    if (encode) {
+        // 编码：标准base64 → base64url
+        let b64 = btoa(code);
+        let b64url = b64.replace(/\+/g, '-').replace(/\//g, '_');
+        b64url = b64url.replace(/=/g, '');
+        return b64url;
+    } else {
+        // 解码：base64url → 标准base64
+        let b64 = code.replace(/-/g, '+').replace(/_/g, '/');
+        const mod = b64.length % 4;
+        if(mod > 0){
+            b64 += '===='.substring(mod);
+        }
+        return atob(b64);
+    }
+}
+
+copyBtn.onclick = async function(){
+    try{
+        await navigator.clipboard.writeText(resultDom.textContent);
+        this.textContent = "ok!";
+        setTimeout(()=>{this.textContent = "Copy Base64URL"},2000);
+    }catch(err){
+        alert("复制失败，请手动选中复制！");
+    }
+}
+</script>
+</body>
+</html>
